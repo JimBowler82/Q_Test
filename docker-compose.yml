@@ -1,0 +1,69 @@
+version: "3"
+
+services:
+  rabbitmq:
+    image: "rabbitmq:3.6-management-alpine"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    networks:
+      - network
+
+  scheduler:
+    build: ./Scheduler
+    depends_on:
+      - rabbitmq
+    command: dockerize -wait tcp://rabbitmq:5672 -timeout 30s node index.js
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+    networks:
+      - network
+
+  scraper_1:
+    build: ./Scraper_1
+    depends_on:
+      - rabbitmq
+    command: dockerize -wait tcp://rabbitmq:5672 -timeout 30s node index.js
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+      - SCRAPER_NUMBER=1
+    networks:
+      - network
+
+  scraper_2:
+    build: ./Scraper_1
+    depends_on:
+      - rabbitmq
+    command: dockerize -wait tcp://rabbitmq:5672 -timeout 30s node index.js
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+      - SCRAPER_NUMBER=2
+    networks:
+      - network
+
+  scraper_3:
+    build: ./Scraper_1
+    depends_on:
+      - rabbitmq
+    command: dockerize -wait tcp://rabbitmq:5672 -timeout 30s node index.js
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+      - SCRAPER_NUMBER=3
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
